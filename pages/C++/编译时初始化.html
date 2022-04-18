@@ -1,0 +1,91 @@
+
+<html lang="zh-cn">
+    <head>
+        <meta content="text/html; charset=utf-8" http-equiv="content-type" />
+        <title>编译时初始化</title>
+        <link href="../../css/default.css" rel="stylesheet">
+    </head>
+    <body>
+        <h1 id="_1">编译时初始化</h1>
+<p>看代码的时候看到一个这样的函数：</p>
+<div class="codehilite"><pre><span></span><code><span class="n">A</span><span class="o">*</span><span class="w"> </span><span class="nf">A::GetInstance</span><span class="p">()</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="k">static</span><span class="w"> </span><span class="n">A</span><span class="w"> </span><span class="n">s_ASingleton</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="o">&amp;</span><span class="n">s_ASingleton</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="n">test</span><span class="p">;</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</code></pre></div>
+
+<p>显然这是一个单例模式的Get方法，但是我之前没有见过这种用法，于是就有了以下疑问：</p>
+<h4 id="s_hwenvironmentsingleton"><strong>这个函数多次调用的话，不会重复初始化s_HwEnvironmentSingleton导致效率很低吗？</strong></h4>
+<p>经过上网调查，发现函数中的static变量是只初始化一次的，于是又有了以下疑问：</p>
+<h4 id="_2"><strong>程序怎么判断这是第一次调用？</strong></h4>
+<p>基于这个疑问，我又写了个测试程序，查看了它的编译结果</p>
+<div class="codehilite"><pre><span></span><code><span class="kt">int</span><span class="w"> </span><span class="nf">test2</span><span class="p">(){</span><span class="w"></span>
+<span class="w">    </span><span class="k">static</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">3</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="o">++</span><span class="n">a</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">a</span><span class="p">;</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</code></pre></div>
+
+<p>其编译结果如下：</p>
+<div class="codehilite"><pre><span></span><code>push    rbp
+mov     rbp, rsp
+mov     eax, DWORD PTR test2()::a[rip]
+add     eax, 1
+mov     DWORD PTR test2()::a[rip], eax
+mov     eax, DWORD PTR test2()::a[rip]
+pop     rbp
+ret
+</code></pre></div>
+
+<p>奇怪的是，这个函数中根本没有对a初始化。</p>
+<h3 id="static"><strong>那么static变量是什么时候初始化的呢？</strong></h3>
+<p><strong><a href="https://blog.csdn.net/qq_34139994/article/details/105157313">C++中static变量的初始化_lucky-billy的博客-CSDN博客_c++静态变量初始化</a></strong></p>
+<p><strong><a href="https://www.cnblogs.com/catch/p/4314256.html">c++ 全局变量初始化的一点总结 - twoon - 博客园</a></strong></p>
+<h3 id="hwenviroment"><strong>刚刚的汇编只对简单类型有效，而对HwEnviroment并不适用。</strong></h3>
+<p>经过试验，可以得到准确结论</p>
+<div class="codehilite"><pre><span></span><code><span class="cp">#include</span><span class="cpf">&lt;iostream&gt;</span><span class="cp"></span>
+<span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">std</span><span class="p">;</span><span class="w"></span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">A</span><span class="p">{</span><span class="w"></span>
+<span class="k">public</span><span class="o">:</span><span class="w"></span>
+<span class="w">    </span><span class="k">static</span><span class="w"> </span><span class="n">A</span><span class="o">*</span><span class="w"> </span><span class="n">getInstance</span><span class="p">(){</span><span class="w"></span>
+<span class="w">        </span><span class="n">cout</span><span class="o">&lt;&lt;</span><span class="s">&quot;调用getInstance&quot;</span><span class="o">&lt;&lt;</span><span class="n">endl</span><span class="p">;</span><span class="w"></span>
+<span class="w">        </span><span class="k">static</span><span class="w"> </span><span class="n">A</span><span class="w"> </span><span class="n">aim</span><span class="p">;</span><span class="w"></span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="o">&amp;</span><span class="n">aim</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="w">    </span><span class="n">A</span><span class="p">(){</span><span class="w"></span>
+<span class="w">        </span><span class="n">cout</span><span class="o">&lt;&lt;</span><span class="s">&quot;A被构造!&quot;</span><span class="o">&lt;&lt;</span><span class="n">endl</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="p">};</span><span class="w"></span>
+<span class="w">    </span><span class="k">virtual</span><span class="w"> </span><span class="o">~</span><span class="n">A</span><span class="p">(){</span><span class="w"></span>
+<span class="w">        </span><span class="n">cout</span><span class="o">&lt;&lt;</span><span class="s">&quot;A被析构!&quot;</span><span class="o">&lt;&lt;</span><span class="n">endl</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="p">};</span><span class="w"></span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="nf">test</span><span class="p">(){</span><span class="w"></span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="p">};</span><span class="w"></span>
+<span class="p">};</span><span class="w"></span>
+
+<span class="kt">int</span><span class="w"> </span><span class="nf">main</span><span class="p">(</span><span class="kt">void</span><span class="p">){</span><span class="w"></span>
+<span class="w">    </span><span class="n">cout</span><span class="o">&lt;&lt;</span><span class="s">&quot;进入main函数&quot;</span><span class="o">&lt;&lt;</span><span class="n">endl</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">A</span><span class="o">::</span><span class="n">getInstance</span><span class="p">()</span><span class="o">-&gt;</span><span class="n">test</span><span class="p">();</span><span class="w"></span>
+<span class="w">    </span><span class="n">cout</span><span class="o">&lt;&lt;</span><span class="n">a</span><span class="o">&lt;&lt;</span><span class="n">endl</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="n">cout</span><span class="o">&lt;&lt;</span><span class="n">A</span><span class="o">::</span><span class="n">getInstance</span><span class="p">()</span><span class="o">-&gt;</span><span class="n">test</span><span class="p">()</span><span class="o">&lt;&lt;</span><span class="n">endl</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</code></pre></div>
+
+<p>执行结果如下：</p>
+<div class="codehilite"><pre><span></span><code>进入main函数
+调用getInstance
+A被构造！
+1
+调用getInstance
+1
+A被析构！
+</code></pre></div>
+
+<h2 id="_3"><strong>结论：</strong></h2>
+<p>s_HwEnvironmentSingleton在GetInstance()第一次调用时被初始化，只初始化一次，此后的调用不会再此初始化。</p>
+    </body>
+</html>
