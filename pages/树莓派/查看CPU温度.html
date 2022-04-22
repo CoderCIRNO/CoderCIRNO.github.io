@@ -1,0 +1,14 @@
+
+<html lang="zh-cn">
+    <head>
+        <meta content="text/html; charset=utf-8" http-equiv="content-type" />
+        <title>查看CPU温度</title>
+        <link href="../../css/default.css" rel="stylesheet">
+    </head>
+    <body>
+        <pre class="codehilite"><code class="language-bash">tmp=`adb shell cat /sys/class/thermal/thermal_zone0/temp`
+tmp=`expr $tmp / 1000`
+echo &quot;tmp = $tmp&quot;
+</code></pre>
+    </body>
+</html>
