@@ -94,7 +94,7 @@ def process_current_path(current_path = "./", root_path = ".."):
         href_path    = dir[1] + "/index.html"
         herfs_text  += f"<a href=\"{href_path}\"><b class=\"dir\" style=\"top:{current_top}px;left:8%;\">{dir[1]}</b></a>\n"
         current_top += top_adder
-        os.mkdir(OUT_PATH + dir[1])
+        os.mkdir(OUT_PATH + current_path + dir[1])
         process_current_path(dir[0] + "/", root_path + "/..")
     for file in file_list:
         print(f"处理文件   - {file[0]}")

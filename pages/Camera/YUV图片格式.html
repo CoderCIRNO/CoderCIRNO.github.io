@@ -1,0 +1,297 @@
+
+<html lang="zh-cn">
+    <head>
+        <meta content="text/html; charset=utf-8" http-equiv="content-type" />
+        <title>YUV图片格式</title>
+        <link href="../../css/default.css" rel="stylesheet">
+    </head>
+    <body>
+        <h1 id="yuv">YUV图片格式</h1>
+<p>YUV是图片、相机、视频中会用到的一种图像格式，Y(Luminance)表示亮度，U(Chrominance)表示色度，V(Chroma)表示浓度。</p>
+<p>YUV根据Y、U、V在水平、垂直方向的采样率之比又分为yuv444、yuv422和yuv420，不同的格式存储方式也略有不同，本文我们以yuv420为例。</p>
+<p>yuv420格式中，Y和UV在水平和垂直方向采样率之比都是2：1，这意味着yuv420一定会损失部分色彩信息。</p>
+<p>Y、U、V分量的存储空间占用比为4:1\:1，存储顺序则是按像素从左到右横向扫描，先存储所有Y分量，再存储所有U分量，最后存储所有V分量，每个分量占一个字节，也就是8bit。</p>
+<p>如果有一个4x4的yuv420p图片，其24B存储空间的大致分布将如下所示：</p>
+<table>
+<thead>
+<tr>
+<th><strong>Y</strong></th>
+<th><strong>Y</strong></th>
+<th><strong>Y</strong></th>
+<th><strong>Y</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Y</strong></td>
+<td><strong>Y</strong></td>
+<td><strong>Y</strong></td>
+<td><strong>Y</strong></td>
+</tr>
+<tr>
+<td><strong>Y</strong></td>
+<td><strong>Y</strong></td>
+<td><strong>Y</strong></td>
+<td><strong>Y</strong></td>
+</tr>
+<tr>
+<td><strong>Y</strong></td>
+<td><strong>Y</strong></td>
+<td><strong>Y</strong></td>
+<td><strong>Y</strong></td>
+</tr>
+<tr>
+<td><strong>V</strong></td>
+<td><strong>V</strong></td>
+<td><strong>V</strong></td>
+<td><strong>V</strong></td>
+</tr>
+<tr>
+<td><strong>U</strong></td>
+<td><strong>U</strong></td>
+<td><strong>U</strong></td>
+<td><strong>U</strong></td>
+</tr>
+</tbody>
+</table>
+<p>Y分量占据了16个字节，U、V分量分别占据4个字节。并不需要知道这些UV是如何反映到每个像素上的，知道大致存储结构就已经可以对图像进行消色操作了。</p>
+<h2 id="yuv_1"><strong>生成与查看YUV图片</strong></h2>
+<p>要转换yuv格式和查看yuv图片，需要安装ffmpeg。</p>
+<p>yuv格式并没有文件头，无法从文件内容中获知图片尺寸信息，必须人为指定。</p>
+<p>因此建议在命名yuv文件时，在文件名中注明图片尺寸，以便后续使用。</p>
+<pre class="codehilite"><code class="language-bash">#安装ffmpeg
+$ sudo apt install ffmpeg
+
+#将图片尺寸为384x182的TestPic.png转换为yuv420格式的图片out_384x182.yuv
+$ ffmpeg -i TestPic.png -s 384x182 -pix_fmt yuv420p out_384x182.yuv
+
+#查看尺寸为384x182的yuv格式图片out_384x182.yuv
+$ ffplay -f rawvideo -video_size 384x182 out_384x182.yuv
+</code></pre>
+
+<h2 id="_1"><strong>图像消色实验</strong></h2>
+<p>通过C++的文件读写操作，可以很轻易的按字节操作yuv文件。</p>
+<p>用 <strong>0x80</strong> （-128）覆盖UV分量即可消除对应的色彩信息。</p>
+<pre class="codehilite"><code class="language-cpp">#include&lt;iostream&gt;
+#include&lt;iomanip&gt;
+#include&lt;fstream&gt;
+#include&lt;thread&gt;
+#include&lt;string.h&gt;
+#include&lt;string&gt;
+#include&lt;dirent.h&gt;
+#include&lt;vector&gt;
+#include&lt;utility&gt;
+#include&lt;chrono&gt;
+#include&lt;cstdlib&gt;
+#include&lt;unistd.h&gt;
+
+#include &lt;android/log.h&gt;
+#include &lt;utils/CallStack.h&gt;
+
+//&lt;utils/CallStack.h&gt; refers &lt;log/log.h&gt;, in &lt;log/log.h&gt; defined  LOG_TAG to NULL
+#undef LOG_TAG
+#define LOG_TAG &quot;wangtianlin1&quot;
+#define LOGD(...) __android_log_print(ANDROID_LOG_DEBUG,LOG_TAG ,__VA_ARGS__)
+#define LOGI(...) __android_log_print(ANDROID_LOG_INFO,LOG_TAG ,__VA_ARGS__)
+
+const uint WIDTH = 1844;
+const uint HEIGTH = 4000;
+const uint BUFFER_CAPACITY = 256;
+
+const std::string INPUT_FOLDER = &quot;input//&quot;;
+const std::string OUTPUT_FOLDER = &quot;output//&quot;;
+const uint8_t FILE_TYPE_NUM = 8;
+
+android::CallStack g_callStack;
+void dump_stack_android(void)
+{
+        g_callStack.update();
+        g_callStack.log(LOG_TAG);
+}
+
+class DataQueue{
+public:
+    DataQueue(){
+        this-&gt;head = nullptr;
+        this-&gt;tail = nullptr;
+        this-&gt;readDone = false;
+        this-&gt;writeDone = false;
+    }
+    //Add a node at queue tail.
+    void Product(char* inputData, uint inputLength){
+        if (!tail){
+            this-&gt;tail = new DataNode(inputData, inputLength);
+            this-&gt;head = this-&gt;tail;
+        }else{
+            this-&gt;tail-&gt;_next = new DataNode(inputData, inputLength);
+            this-&gt;tail = this-&gt;tail-&gt;_next;
+        }
+    }
+    //Get a node at queue head and delete it, if head is null, keep waitting.
+    std::pair&lt;char*, uint&gt; Consume(){
+        //Consumer is allowed to wait.
+        while(!this-&gt;head);
+        std::pair&lt;char*, uint&gt; result((char*)this-&gt;head-&gt;_data, this-&gt;head-&gt;_length);
+        DataNode* temp = (DataNode*)this-&gt;head;
+        //Another wait.
+        while(!this-&gt;head-&gt;_next &amp;&amp; !this-&gt;readDone);
+        /*///////////////////////////////////////////////////////////////////////////////////////////////
+        //
+        //    Three situations : (next) || (done) || (next &amp;&amp; done)
+        //    next: strill reading.
+        //    done: read finished and data is empty. Writting should stop at this situation.
+        //    next &amp;&amp; done: read finished but data is not empty.
+        //
+        ///////////////////////////////////////////////////////////////////////////////////////////////*/
+        if(this-&gt;head-&gt;_next){
+            this-&gt;head = temp-&gt;_next;
+        }else{
+            //read done and write done.
+            this-&gt;writeDone = true;
+            LOGD(&quot;Child Thread - Write Finished.\n&quot;);
+            dump_stack_android();
+        }
+        delete(temp);
+        return result;
+    }
+    void SetReadDone(){
+        this-&gt;readDone = true;
+    }
+    bool IsWriteDone(){
+        return (bool)this-&gt;writeDone;
+    }
+private:
+    struct DataNode{
+        char* volatile _data;
+        volatile uint _length;
+        DataNode* volatile _next;
+        DataNode(char* inputData, uint inputLength){
+            _data = inputData;
+            _length = inputLength;
+            _next = nullptr;
+        }
+    };
+    DataNode* volatile head;
+    DataNode* volatile tail;
+    volatile bool readDone;
+    volatile bool writeDone;
+};
+
+DataQueue* g_DQ = new DataQueue();
+
+//Open INPUT_FOLDER and create a string vector by all files
+void CreateFileNameVector(std::vector&lt;std::string&gt; &amp;inputStringVector){
+    DIR* dir;
+    struct dirent* ptr;
+    std::string path = &quot;input//&quot;;
+    if(NULL == (dir = opendir(path.c_str()))){
+        LOGI(&quot;Main  Thread - No input file found!\n&quot;);
+        exit(1);
+        return;
+    }
+    while((ptr = readdir(dir)) != NULL){
+        if(FILE_TYPE_NUM == ptr-&gt;d_type){
+            std::string temp = ptr-&gt;d_name;
+            inputStringVector.push_back(temp);
+        }
+    }
+    return;
+}
+//Read BUFFER_CAPACITY Byte once from yuv file and deliver it to writer thread, skip -
+//color informations(UV).
+void PicDataRead(void){
+    const uint ReadByteNum = WIDTH * HEIGTH;
+    std::vector&lt;std::string&gt; fileNames;
+    CreateFileNameVector(fileNames);
+
+    for(const std::string &amp;currentFileName : fileNames){
+        std::ifstream picReader(INPUT_FOLDER + currentFileName, std::ifstream::binary);
+
+        char* _temp = new char[currentFileName.size()];
+        strcpy(_temp, currentFileName.c_str());
+
+        picReader.seekg(0, picReader.end);
+        const uint PicSize = picReader.tellg();
+        picReader.seekg(0, picReader.beg);
+        g_DQ-&gt;Product(_temp, PicSize - ReadByteNum);
+
+        LOGD(&quot;Main  Thread - File %s reading...\n&quot;, currentFileName.c_str());
+        for(uint readCounter = 0; readCounter &lt; ReadByteNum;){
+            uint _bufferLeft = ReadByteNum - readCounter;
+            uint _currentBufferSize = BUFFER_CAPACITY;
+            if(_bufferLeft &lt; BUFFER_CAPACITY){
+                _currentBufferSize = _bufferLeft;
+            }
+            char* inputData = new char[_currentBufferSize];
+            picReader.read(inputData, _currentBufferSize);
+            g_DQ-&gt;Product(inputData, _currentBufferSize);
+            readCounter += _currentBufferSize;
+        }
+        picReader.close();
+        LOGD(&quot;Main  Thread - File %s reading done!\n&quot;, currentFileName.c_str());
+    }
+    g_DQ-&gt;SetReadDone();
+    LOGD(&quot;Main  Thread - Read Finished!\n&quot;);
+    return;
+}
+
+//Write information received to file, and fill color information with 0x80.
+void PicDataWrite(void){
+    const uint WriteByteNum = WIDTH * HEIGTH;
+    char* grayBuffer = new char[BUFFER_CAPACITY];
+    memset(grayBuffer,0x80,BUFFER_CAPACITY);
+    while(true){
+        LOGD(&quot;Child Thread - Getting file name and bufferLeftNum...\n&quot;);
+        std::pair&lt;char*, uint&gt; resultReceiver = g_DQ-&gt;Consume();
+        std::string currentFileName(resultReceiver.first);
+        const uint bufferLeftNum = resultReceiver.second;
+        LOGD(&quot;Child Thread - File name: %s\n&quot;,  currentFileName.c_str());
+        delete[](resultReceiver.first);
+        std::ofstream picOutput(OUTPUT_FOLDER + currentFileName, std::ofstream::binary);
+
+        LOGD(&quot;Child Thread - File %s writing...\n&quot;, currentFileName.c_str());
+        for(uint writeCounter = 0; writeCounter &lt; WriteByteNum;){
+            resultReceiver = g_DQ-&gt;Consume();
+            picOutput.write(resultReceiver.first, resultReceiver.second);
+            delete[](resultReceiver.first);
+            writeCounter += resultReceiver.second;
+        }
+
+        for(uint writeCounter = 0; writeCounter &lt; bufferLeftNum;){
+            uint _bufferLeft = bufferLeftNum - writeCounter;
+            uint _currentBufferSize = BUFFER_CAPACITY;
+            if(_bufferLeft &lt; BUFFER_CAPACITY){
+                _currentBufferSize = _bufferLeft;
+            }
+            picOutput.write(grayBuffer, _currentBufferSize);
+            writeCounter += _currentBufferSize;
+        }
+        picOutput.close();
+        LOGD(&quot;Child Thread - File %s writing done!\n&quot;, currentFileName.c_str());
+
+        if(g_DQ-&gt;IsWriteDone()){
+            LOGD(&quot;Child Thread - All file processed!\n&quot;);
+            break;
+        }
+    }
+    delete[](grayBuffer);
+    return;
+}
+
+int main(void){
+    const std::chrono::system_clock::time_point startTime = std::chrono::system_clock::now();
+    LOGD(&quot;Main  Thread - #######Start#######\n&quot;);
+
+    std::thread t_writer(PicDataWrite);
+    PicDataRead();
+    LOGD(&quot;Main  Thread - Waitting child thread...\n&quot;);
+    t_writer.join();
+
+    const std::chrono::system_clock::time_point endTime = std::chrono::system_clock::now();
+    const auto duration = std::chrono::duration_cast&lt;std::chrono::microseconds&gt;(endTime - startTime).count();
+    LOGD(&quot;Main  Thread - All time consumed %.3f  ms\n&quot;, duration * 1e-3);
+    LOGD(&quot;Main  Thread - ####### End #######\n&quot;);
+}
+</code></pre>
+    </body>
+</html>
