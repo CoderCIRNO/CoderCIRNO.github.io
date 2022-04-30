@@ -1,0 +1,45 @@
+
+<html lang="zh-cn">
+    <head>
+        <meta content="text/html; charset=utf-8" http-equiv="content-type" />
+        <title>去除此电脑中的无用快捷方式</title>
+        <link href="../../css/default.css" rel="stylesheet">
+    </head>
+    <body>
+        <h1 id="_1">去除此电脑中的无用快捷方式</h1>
+<div class="codehilite"><pre><span></span><code>Windows Registry Editor Version 5.00
+
+;如需还原去除上语句前减号即可
+
+;取消我的电脑&quot;视频&quot;文件夹
+
+[-HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\MyComputer\NameSpace\{f86fa3ab-70d2-4fc7-9c99-fcbf05467f3a}]
+
+;取消我的电脑&quot;文档&quot;文件夹
+
+;[-HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\MyComputer\NameSpace\{d3162b92-9365-467a-956b-92703aca08af}]
+
+;取消我的电脑&quot;桌面&quot;文件夹
+
+;[-HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\MyComputer\NameSpace\{B4BFCC3A-DB2C-424C-B029-7FE99A87C641}]
+
+;取消我的电脑&quot;音乐&quot;文件夹?
+
+[-HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\MyComputer\NameSpace\{3dfdf296-dbec-4fb4-81d1-6a3438bcf4de}]
+
+;取消我的电脑&quot;下载&quot;文件夹
+
+[-HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\MyComputer\NameSpace\{088e3905-0323-4b02-9826-5d99428e115f}]
+
+;取消我的电脑&quot;图片&quot;文件夹
+
+[-HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\MyComputer\NameSpace\{24ad3ad4-a569-4530-98e1-ab02f9417aa8}]
+
+;取消我的电脑&quot;3D对象&quot;文件夹
+
+[-HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\MyComputer\NameSpace\{0DB7E03F-FC29-4DC6-9020-FF41B59E513A}]
+</code></pre></div>
+
+<p>保存为*.reg，双击写入相应的注册表项即可</p>
+    </body>
+</html>

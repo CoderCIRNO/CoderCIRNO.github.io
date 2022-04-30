@@ -8,66 +8,66 @@
     <body>
         <h1 id="_1">成员初值列的效率优势</h1>
 <h2 id="_2"><strong>以下两种构造函数有何区别？</strong></h2>
-<pre class="codehilite"><code class="language-cpp">class A{
-public:
-    A(int _a, int _b)
-    :a(_a),
-    b(_b)
-    {
-        // nothing to do
-    }
-private:
-    int a;
-    int b;
-};
-</code></pre>
+<div class="codehilite"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">A</span><span class="p">{</span><span class="w"></span>
+<span class="k">public</span><span class="o">:</span><span class="w"></span>
+<span class="w">    </span><span class="n">A</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">_a</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">_b</span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="o">:</span><span class="n">a</span><span class="p">(</span><span class="n">_a</span><span class="p">),</span><span class="w"></span>
+<span class="w">    </span><span class="n">b</span><span class="p">(</span><span class="n">_b</span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="c1">// nothing to do</span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="k">private</span><span class="o">:</span><span class="w"></span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">a</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">b</span><span class="p">;</span><span class="w"></span>
+<span class="p">};</span><span class="w"></span>
+</code></pre></div>
 
-<pre class="codehilite"><code class="language-cpp">class B{
-public:
-    B(int _a, int _b)
-    {
-        a = _a;
-        b = _b;
-    }
-private:
-    int a;
-    int b;
-};
-</code></pre>
+<div class="codehilite"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">B</span><span class="p">{</span><span class="w"></span>
+<span class="k">public</span><span class="o">:</span><span class="w"></span>
+<span class="w">    </span><span class="n">B</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">_a</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">_b</span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="n">a</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">_a</span><span class="p">;</span><span class="w"></span>
+<span class="w">        </span><span class="n">b</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">_b</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="k">private</span><span class="o">:</span><span class="w"></span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">a</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">b</span><span class="p">;</span><span class="w"></span>
+<span class="p">};</span><span class="w"></span>
+</code></pre></div>
 
 <p>这两种成员变量初始化方式都非常常见，一些人（比如我）对左边的成员初值列写法具有天然的抗拒性，总是隐约的认为右边直接在函数中赋值的写法“可读性更高”（实际上只是因为自己更熟悉），而且不会带来任何效率损失。</p>
 <p>实际上在上述代码中，这两种写法的编译结果是完全一致的，这也意味着两种写法没有任何效率上的差别。<strong>但在一些情况下，两种写法的确有着不容忽视的效率差别。</strong></p>
 <h2 id="_3"><strong>阅读以下代码：</strong></h2>
-<pre class="codehilite"><code class="language-cpp">class A{
-public:
-    A(int _a, int _b)
-    :a(_a),
-    b(_b)
-    {
-        // do nothing
-    }
-private:
-    int a = 1;
-    int b = 2;
-};
-</code></pre>
+<div class="codehilite"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">A</span><span class="p">{</span><span class="w"></span>
+<span class="k">public</span><span class="o">:</span><span class="w"></span>
+<span class="w">    </span><span class="n">A</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">_a</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">_b</span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="o">:</span><span class="n">a</span><span class="p">(</span><span class="n">_a</span><span class="p">),</span><span class="w"></span>
+<span class="w">    </span><span class="n">b</span><span class="p">(</span><span class="n">_b</span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="c1">// do nothing</span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="k">private</span><span class="o">:</span><span class="w"></span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">b</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span><span class="w"></span>
+<span class="p">};</span><span class="w"></span>
+</code></pre></div>
 
-<pre class="codehilite"><code class="language-cpp">class B{
-public:
-    B(int _a, int _b)
-    {
-        a = _a;
-        b = _b;
-    }
-private:
-    int a = 1;
-    int b = 2;
-};
-</code></pre>
+<div class="codehilite"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">B</span><span class="p">{</span><span class="w"></span>
+<span class="k">public</span><span class="o">:</span><span class="w"></span>
+<span class="w">    </span><span class="n">B</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">_a</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">_b</span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="n">a</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">_a</span><span class="p">;</span><span class="w"></span>
+<span class="w">        </span><span class="n">b</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">_b</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="k">private</span><span class="o">:</span><span class="w"></span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">b</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span><span class="w"></span>
+<span class="p">};</span><span class="w"></span>
+</code></pre></div>
 
 <p>当我们对成员变量定义了默认初始化时，两者在效率上的差别又如何呢？</p>
 <p>观察 -O0 参数下的编译结果会发现，成员初值列的效率的确更高一些：</p>
-<pre class="codehilite"><code class="language-text">A::A(int, int) [base object constructor]:
+<div class="codehilite"><pre><span></span><code>A::A(int, int) [base object constructor]:
         push    rbp
         mov     rbp, rsp
         mov     QWORD PTR [rbp-8], rdi
@@ -82,9 +82,9 @@ private:
         nop
         pop     rbp
         ret
-</code></pre>
+</code></pre></div>
 
-<pre class="codehilite"><code class="language-text">B::B(int, int) [base object constructor]:
+<div class="codehilite"><pre><span></span><code>B::B(int, int) [base object constructor]:
         push    rbp
         mov     rbp, rsp
         mov     QWORD PTR [rbp-8], rdi
@@ -103,21 +103,21 @@ private:
         nop
         pop     rbp
         ret
-</code></pre>
+</code></pre></div>
 
 <p>可以观察到，成员初值列跳过了默认初始化，进而直接用构造函数的参数对成员变量进行初始化；而函数中赋值则仍然使用了成员变量的默认初始化，随后其<strong>初始化结果被丢弃</strong>，进而使用参数对成员变量进行赋值。</p>
 <p>实际上上述情况由于写法不太规范，也比较少见。一种比较常见的情况是某个类声明了一个结构体或是类成员变量，而它们自己定义了默认构造。但为了<strong>”确保每一个构造函数都将对象的每一个成员初始化“</strong>，我们又需要在构造函数中对其进行初始化，这时使用成员初值列的优势就非常明显了。</p>
-<pre class="codehilite"><code class="language-cpp">class A{
-public:
-    A(T _t)
-    :t(_t)
-    {
-        // do nothing
-    }
-private:
-    T t; // T is a struct or class type
-}
-</code></pre>
+<div class="codehilite"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">A</span><span class="p">{</span><span class="w"></span>
+<span class="k">public</span><span class="o">:</span><span class="w"></span>
+<span class="w">    </span><span class="n">A</span><span class="p">(</span><span class="n">T</span><span class="w"> </span><span class="n">_t</span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="o">:</span><span class="n">t</span><span class="p">(</span><span class="n">_t</span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="c1">// do nothing</span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="k">private</span><span class="o">:</span><span class="w"></span>
+<span class="w">    </span><span class="n">T</span><span class="w"> </span><span class="n">t</span><span class="p">;</span><span class="w"> </span><span class="c1">// T is a struct or class type</span>
+<span class="p">}</span><span class="w"></span>
+</code></pre></div>
 
 <p>成员初值列的写法没有调用T()，而是直接使用了自动生成的拷贝构造（不推荐使用自动生成的任何构造，以免造成难以预测的不良影响）；</p>
 <p>而相对的，在函数中赋值的写法在进入函数前先调用了T()对t进行初始化，然后将参数_t拷贝给成员变量t。</p>

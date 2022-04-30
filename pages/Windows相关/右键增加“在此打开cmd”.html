@@ -1,0 +1,43 @@
+
+<html lang="zh-cn">
+    <head>
+        <meta content="text/html; charset=utf-8" http-equiv="content-type" />
+        <title>右键增加“在此打开cmd”</title>
+        <link href="../../css/default.css" rel="stylesheet">
+    </head>
+    <body>
+        <h1 id="cmd">右键增加“在此打开cmd”</h1>
+<div class="codehilite"><pre><span></span><code>Windows Registry Editor Version 5.00
+
+[HKEY_CLASSES_ROOT\Directory\shell\OpenCmdHere]
+@=&quot;open cmd here&quot;
+&quot;Icon&quot;=&quot;cmd.exe&quot;
+
+[HKEY_CLASSES_ROOT\Directory\shell\OpenCmdHere\command]
+@=&quot;cmd.exe /s /k pushd \&quot;%V\&quot;&quot;
+
+[HKEY_CLASSES_ROOT\Directory\Background\shell\OpenCmdHere]
+@=&quot;open cmd here&quot;
+&quot;Icon&quot;=&quot;cmd.exe&quot;
+
+[HKEY_CLASSES_ROOT\Directory\Background\shell\OpenCmdHere\command]
+@=&quot;cmd.exe /s /k pushd \&quot;%V\&quot;&quot;
+
+[HKEY_CLASSES_ROOT\Drive\shell\OpenCmdHere]
+@=&quot;open cmd here&quot;
+&quot;Icon&quot;=&quot;cmd.exe&quot;
+
+[HKEY_CLASSES_ROOT\Drive\shell\OpenCmdHere\command]
+@=&quot;cmd.exe /s /k pushd \&quot;%V\&quot;&quot;
+
+[HKEY_CLASSES_ROOT\LibraryFolder\background\shell\OpenCmdHere]
+@=&quot;open cmd here&quot;
+&quot;Icon&quot;=&quot;cmd.exe&quot;
+
+[HKEY_CLASSES_ROOT\LibraryFolder\background\shell\OpenCmdHere\command]
+@=&quot;cmd.exe /s /k pushd \&quot;%V\&quot;&quot;
+</code></pre></div>
+
+<p>保存为*.reg，双击写入相应的注册表项</p>
+    </body>
+</html>
