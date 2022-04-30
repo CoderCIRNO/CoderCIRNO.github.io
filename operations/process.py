@@ -71,8 +71,8 @@ ARTICLE_TEMPLATE = '''
 </html>
 '''
 
-def process_current_path(current_path = "./", root_path = ".."):
-    print(f"进入文件夹 - {current_path}")
+def process_current_path(current_path = "./", root_path = "..", depth = "|-"):
+    print(f"{depth}进入文件夹 - {current_path}")
     fileList  = os.listdir(MDS_PATH + current_path)
     dir_list  = []
     file_list = []
@@ -90,14 +90,15 @@ def process_current_path(current_path = "./", root_path = ".."):
     # process dir list first
     current_top = 128
     top_adder   = 32
+    next_depth  = "| " + depth
     for dir in dir_list:
         href_path    = dir[1] + "/index.html"
         herfs_text  += f"<a href=\"{href_path}\"><b class=\"dir\" style=\"top:{current_top}px;left:8%;\">{dir[1]}</b></a>\n"
         current_top += top_adder
         os.mkdir(OUT_PATH + current_path + dir[1])
-        process_current_path(dir[0] + "/", root_path + "/..")
+        process_current_path(dir[0] + "/", root_path + "/..", next_depth)
     for file in file_list:
-        print(f"处理文件   - {file[0]}")
+        print(f"{next_depth}处理文件 - {file[0]}")
 
         input_file  = open(MDS_PATH + file[0], mode="r", encoding="utf-8")
         text        = input_file.read()
@@ -115,7 +116,7 @@ def process_current_path(current_path = "./", root_path = ".."):
     index_text = index_text.replace("##HERFS##", herfs_text)
     index_file.write(index_text)
     index_file.close()
-    print(f"退出文件夹 - {current_path}")
+    print(f"{depth}退出文件夹 - {current_path}")
 
 if os.path.exists("./process.py"):
     shutil.rmtree(OUT_PATH)

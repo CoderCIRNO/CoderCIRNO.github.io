@@ -9,21 +9,21 @@
         <h1 id="effective-c">《Effective C++》</h1>
 <h2 id="02">条款02</h2>
 <h3 id="const-enum-inline-define">以 const, enum, inline 替换 #define的优点</h3>
-<ol>
-<li>编译时报错容易定位问题</li>
-</ol>
+<ul>
+<li><strong>编译时报错容易定位问题</strong></li>
+</ul>
 <p>c++代码编译的过程：预处理 - 编译 - 汇编 - 链接</p>
 <p><code>#define</code>仅在预处理期有意义，如果在代码种定义了一个<code>#define N 100</code>，那么在编译期，编译器根本见不到N这个符号，也自然不会进到符号表种。</p>
 <p>假使这个<code>N</code>在编译中引发了某种错误，那么编译器只会提到<code>"100"</code>而不是<code>"N"</code>，在一些情况下，这种报错很可能会让人摸不到头脑，更有甚者，如果程序员不幸写出了<code>"N100"</code>这种代码，编译器甚至会提示问题出在<code>"100100"</code>上，这会让报错信息的迷惑性更上一层楼。</p>
 <p>而如果用<code>const int N = 100;</code>来替代这一功能，编译器就会很明白的提示问题出在<code>"N"</code>上。</p>
-<ol>
-<li>可以提供易处理的作用域与可见性</li>
-</ol>
+<ul>
+<li><strong>可以提供易处理的作用域与可见性</strong></li>
+</ul>
 <p><code>#define</code>并不重视作用域，一旦被定义，在后续的预处理中就都会被替换，除非使用了<code>#undef</code>，如此一来，控制<code>#define</code>的作用域会变得相当困难。</p>
 <p>并且，<code>#define</code>并不提供任何封装性，它对一切可见，这也不符合C++的设计思想。</p>
-<ol>
-<li>尽量不使用宏函数，能够避免歧义</li>
-</ol>
+<ul>
+<li><strong>尽量不使用宏函数，能够避免歧义</strong></li>
+</ul>
 <p>宏函数因为没有普通函数传参、入栈出栈、地址跳转之类的开销，而备受推崇，不过在某些情况下，宏函数的特性会非常让人困惑。</p>
 <div class="codehilite"><pre><span></span><code><span class="cp">#define CALL_WTIH_MAX(a, b) f((a) &gt; (b) ? (a) : (b))</span>
 
@@ -34,6 +34,6 @@
 </code></pre></div>
 
 <p>产生这种歧义的原因在于，<code>++a</code>被用于替换了宏函数中的所有<code>a</code>，三目运算符中的<code>a</code>也如此，因此当<code>a</code>比较大时，<code>++a</code>被自然的执行了两次————比较时一次，得到结果时，又一次，这大概并不符合这个宏函数的设计初衷。</p>
-<p>[TBC]</p>
+<p><strong>[TBC]</strong></p>
     </body>
 </html>
