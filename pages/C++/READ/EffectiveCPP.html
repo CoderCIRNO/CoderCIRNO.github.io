@@ -34,6 +34,20 @@
 </code></pre></div>
 
 <p>产生这种歧义的原因在于，<code>++a</code>被用于替换了宏函数中的所有<code>a</code>，三目运算符中的<code>a</code>也如此，因此当<code>a</code>比较大时，<code>++a</code>被自然的执行了两次————比较时一次，得到结果时，又一次，这大概并不符合这个宏函数的设计初衷。</p>
+<h2 id="03">条款03</h2>
+<h3 id="const">const与指针</h3>
+<p><code>const</code>在和指针搭配时，有三种用法。</p>
+<div class="codehilite"><pre><span></span><code><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="o">*</span><span class="w"> </span><span class="n">a</span><span class="p">;</span><span class="w">       </span><span class="c1">// 指向的数据不可变，但指针本身可变</span>
+<span class="kt">int</span><span class="w"> </span><span class="k">const</span><span class="o">*</span><span class="w"> </span><span class="n">a</span><span class="p">;</span><span class="w">       </span><span class="c1">// 同上，这两种用法和下一种的区别在于const和*的相对位置</span>
+<span class="kt">int</span><span class="o">*</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">a</span><span class="p">;</span><span class="w">       </span><span class="c1">// 指针本身不可变，但指向的数据可变</span>
+<span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="o">*</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">a</span><span class="p">;</span><span class="w"> </span><span class="c1">// 指针本身和其指向的数据都不可变</span>
+</code></pre></div>
+
+<p>另外，<code>volatile</code>关键字修饰指针时与<code>const</code>比较相似。</p>
+<h3 id="conststl">const与STL迭代器</h3>
+<p>迭代器是指针的一种封装，声明<code>iterator</code>迭代器为const，就和声明<code>T* const</code>指针一样，即其本身不可变，但指向的数据可变。</p>
+<p>如果想要使用<code>const T*</code>，要声明为<code>const_iteratot</code>。</p>
+<h3 id="const_1">const与函数</h3>
 <p><strong>[TBC]</strong></p>
     </body>
 </html>
