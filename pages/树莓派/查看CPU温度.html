@@ -6,7 +6,8 @@
         <link href="../../css/default.css" rel="stylesheet">
     </head>
     <body>
-        <div class="codehilite"><pre><span></span><code><span class="nv">tmp</span><span class="o">=</span><span class="sb">`</span>adb shell cat /sys/class/thermal/thermal_zone0/temp<span class="sb">`</span>
+        <h1 id="cpu">查看CPU温度</h1>
+<div class="codehilite"><pre><span></span><code><span class="nv">tmp</span><span class="o">=</span><span class="sb">`</span>adb shell cat /sys/class/thermal/thermal_zone0/temp<span class="sb">`</span>
 <span class="nv">tmp</span><span class="o">=</span><span class="sb">`</span>expr <span class="nv">$tmp</span> / <span class="m">1000</span><span class="sb">`</span>
 <span class="nb">echo</span> <span class="s2">&quot;tmp = </span><span class="nv">$tmp</span><span class="s2">&quot;</span>
 </code></pre></div>

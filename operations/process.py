@@ -1,11 +1,15 @@
-from cgitb import html
 import markdown
-import codecs
 import shutil
 import os
 
 MDS_PATH = "../mds/"
 OUT_PATH = "../pages/"
+
+HIDDEN_DIRS = {
+    "技术不相关"
+}
+
+HIDDEN_PAGES = set()
 
 EXTENSIONS = [
     'markdown.extensions.extra',
@@ -93,8 +97,9 @@ def process_current_path(current_path = "./", root_path = "..", depth = "|-"):
     next_depth  = "| " + depth
     for dir in dir_list:
         href_path    = dir[1] + "/index.html"
-        herfs_text  += f"<a href=\"{href_path}\"><b class=\"dir\" style=\"top:{current_top}px;left:8%;\">{dir[1]}</b></a>\n"
-        current_top += top_adder
+        if dir[1] not in HIDDEN_DIRS:
+            herfs_text  += f"<a href=\"{href_path}\"><b class=\"dir\" style=\"top:{current_top}px;left:8%;\">{dir[1]}</b></a>\n"
+            current_top += top_adder
         os.mkdir(OUT_PATH + current_path + dir[1])
         process_current_path(dir[0] + "/", root_path + "/..", next_depth)
     for file in file_list:
@@ -110,9 +115,9 @@ def process_current_path(current_path = "./", root_path = "..", depth = "|-"):
         output_file = open(OUT_PATH + current_path + html_name, "w+", encoding="utf-8")
         output_file.write(html_text)
         output_file.close()
-
-        herfs_text  += f"<a href=\"{html_name}\"><b class=\"file\" style=\"top:{current_top}px;left:8%;\">{file[1]}</b></a>\n"
-        current_top += top_adder
+        if file[1] not in HIDDEN_PAGES:
+            herfs_text  += f"<a href=\"{html_name}\"><b class=\"file\" style=\"top:{current_top}px;left:8%;\">{file[1]}</b></a>\n"
+            current_top += top_adder
     index_text = index_text.replace("##HERFS##", herfs_text)
     index_file.write(index_text)
     index_file.close()
