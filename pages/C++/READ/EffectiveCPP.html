@@ -48,6 +48,29 @@
 <p>迭代器是指针的一种封装，声明<code>iterator</code>迭代器为const，就和声明<code>T* const</code>指针一样，即其本身不可变，但指向的数据可变。</p>
 <p>如果想要使用<code>const T*</code>，要声明为<code>const_iteratot</code>。</p>
 <h3 id="const_1">const与函数</h3>
+<p>一般情况下，<code>const</code>成员函数不能修改成员变量，但以<code>mutable</code>修饰的成员变量除外。</p>
+<h3 id="_1">一种减少代码重复量的做法</h3>
+<div class="codehilite"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">TB</span><span class="p">{</span><span class="w"></span>
+<span class="k">public</span><span class="o">:</span><span class="w"></span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="o">&amp;</span><span class="w"> </span><span class="k">operator</span><span class="p">[](</span><span class="n">std</span><span class="o">::</span><span class="kt">size_t</span><span class="w"> </span><span class="n">position</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"></span>
+<span class="w">    </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="c1">// 一些复杂操作，比如记录访问记录、判断是否越界之类…</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">text</span><span class="p">[</span><span class="n">position</span><span class="p">];</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="w">    </span><span class="kt">char</span><span class="o">&amp;</span><span class="w"> </span><span class="n">operatot</span><span class="p">[](</span><span class="n">std</span><span class="o">::</span><span class="kt">size_t</span><span class="w"> </span><span class="n">position</span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="k">const_cast</span><span class="o">&lt;</span><span class="kt">char</span><span class="o">&amp;&gt;</span><span class="p">(</span><span class="w"></span>
+<span class="w">            </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="k">const</span><span class="w"> </span><span class="n">TextBlock</span><span class="o">&amp;&gt;</span><span class="p">(</span><span class="o">*</span><span class="k">this</span><span class="p">)[</span><span class="n">position</span><span class="p">]</span><span class="w"></span>
+<span class="w">        </span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="k">private</span><span class="o">:</span><span class="w"></span>
+<span class="w">    </span><span class="kt">char</span><span class="w"> </span><span class="n">text</span><span class="p">[</span><span class="mi">256</span><span class="p">];</span><span class="w"></span>
+<span class="p">};</span><span class="w"></span>
+</code></pre></div>
+
+<p>如上，对于<code>[]</code>运算符，如果作用于<code>TextBlock</code>，则返回可修改的<code>text</code>引用；如作用于<code>const TextBlock</code>，则返回<code>const text</code>引用。</p>
+<p>如上的写法能在保证<code>TextBlock</code>和<code>const TextBlock</code>的<code>[]</code>运算符功能的同时，省去重写一遍注释处操作的麻烦。</p>
+<p>其弊在于两次转换拉低了效率；其利在于减少了不必要的代码量、还能降低维护成本（如果选择重写一遍，后续变更操作符功能时需要做两次同样的修改，还埋下了只修改一处忘记另一处的风险）。</p>
 <p><strong>[TBC]</strong></p>
     </body>
 </html>

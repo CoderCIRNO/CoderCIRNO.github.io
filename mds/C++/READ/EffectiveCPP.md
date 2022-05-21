@@ -56,4 +56,33 @@ const int* const a; // 指针本身和其指向的数据都不可变
 
 ### const与函数
 
+一般情况下，`const`成员函数不能修改成员变量，但以`mutable`修饰的成员变量除外。
+
+### 一种减少代码重复量的做法
+
+```cpp
+class TB{
+public:
+    const char& operator[](std::size_t position) const
+    {
+        // 一些复杂操作，比如记录访问记录、判断是否越界之类…
+        return text[position];
+    }
+    char& operatot[](std::size_t position)
+    {
+        return const_cast<char&>(
+            static_cast<const TextBlock&>(*this)[position]
+        );
+    }
+private:
+    char text[256];
+};
+```
+如上，对于`[]`运算符，如果作用于`TextBlock`，则返回可修改的`text`引用；如作用于`const TextBlock`，则返回`const text`引用。
+
+如上的写法能在保证`TextBlock`和`const TextBlock`的`[]`运算符功能的同时，省去重写一遍注释处操作的麻烦。
+
+其弊在于两次转换拉低了效率；其利在于减少了不必要的代码量、还能降低维护成本（如果选择重写一遍，后续变更操作符功能时需要做两次同样的修改，还埋下了只修改一处忘记另一处的风险）。
+
+
 **[TBC]**
