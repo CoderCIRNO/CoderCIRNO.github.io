@@ -49,6 +49,7 @@
 <p>如果想要使用<code>const T*</code>，要声明为<code>const_iteratot</code>。</p>
 <h3 id="const_1">const与函数</h3>
 <p>一般情况下，<code>const</code>成员函数不能修改成员变量，但以<code>mutable</code>修饰的成员变量除外。</p>
+<p><code>const</code>成员函数不能调用<code>non-const</code>成员函数，反之则可以。</p>
 <h3 id="_1">一种减少代码重复量的做法</h3>
 <div class="codehilite"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">TB</span><span class="p">{</span><span class="w"></span>
 <span class="k">public</span><span class="o">:</span><span class="w"></span>
@@ -71,6 +72,21 @@
 <p>如上，对于<code>[]</code>运算符，如果作用于<code>TextBlock</code>，则返回可修改的<code>text</code>引用；如作用于<code>const TextBlock</code>，则返回<code>const text</code>引用。</p>
 <p>如上的写法能在保证<code>TextBlock</code>和<code>const TextBlock</code>的<code>[]</code>运算符功能的同时，省去重写一遍注释处操作的麻烦。</p>
 <p>其弊在于两次转换拉低了效率；其利在于减少了不必要的代码量、还能降低维护成本（如果选择重写一遍，后续变更操作符功能时需要做两次同样的修改，还埋下了只修改一处忘记另一处的风险）。</p>
+<h2 id="04">条款04</h2>
+<h3 id="_2">一个规则</h3>
+<p>确保每一个构造函数都将对象的每一个成员初始化。</p>
+<h3 id="_3">关于成员初值列</h3>
+<p><a href="../%E6%88%90%E5%91%98%E5%88%9D%E5%80%BC%E5%88%97%E7%9A%84%E6%95%88%E7%8E%87%E4%BC%98%E5%8A%BF.html">跳转链接</a></p>
+<h3 id="non-local-static">non-local static</h3>
+<p>不同编译单元中定义的<code>non-local static</code>对象，其初始化顺序无法确定（<code>static</code>对象在其声明代码首次被加载到内存中时，被初始化，即我们无法确定不同编译单元中代码的加载顺序）。不过我们可以把这种对象放在其专属函数内，让这个函数返回其引用。参考<a href="../%E7%BC%96%E8%AF%91%E6%97%B6%E5%88%9D%E5%A7%8B%E5%8C%96.html">编译时初始化</a>。</p>
+<p>且从C++11起，这一做法就已经可以保证多线程安全。</p>
+<h2 id="05">条款05</h2>
+<h3 id="_4">空类</h3>
+<p>编译器会为一个空类生成默认构造函数、拷贝构造、<code>operator=</code>操作符和一个析构函数，如果开发者特意为一个类声明这其中的某个函数，那么此默认函数将不再被自动生成。</p>
+<h3 id="_5">默认的拷贝构造</h3>
+<p>其功能是将来源对象的每一个non-static成员变量拷贝到目标对象，即所谓浅拷贝。</p>
+<p>但如果成员变量中含有引用，则默认拷贝构造不会被生成，因为C++并不允许改变引用的指向。如果开发者没有为其定义拷贝构造，那么这个类将不存在拷贝构造函数，任何对象间的copy操作都无法通过编译。</p>
+<h2 id="06">条款06</h2>
 <p><strong>[TBC]</strong></p>
     </body>
 </html>

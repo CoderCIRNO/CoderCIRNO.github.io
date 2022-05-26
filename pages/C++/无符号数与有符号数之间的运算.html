@@ -1,0 +1,39 @@
+
+<html lang="zh-cn">
+    <head>
+        <meta content="text/html; charset=utf-8" http-equiv="content-type" />
+        <title>无符号数与有符号数之间的运算</title>
+        <link href="../../css/default.css" rel="stylesheet">
+    </head>
+    <body>
+        <h1 id="_1">无符号数与有符号数之间的运算</h1>
+<h2 id="_2">问题</h2>
+<p>运行如下代码</p>
+<div class="codehilite"><pre><span></span><code><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">10</span><span class="p">;</span><span class="w"></span>
+<span class="kt">unsigned</span><span class="w"> </span><span class="n">u</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">20</span><span class="p">;</span><span class="w"></span>
+<span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">u</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">endl</span><span class="p">;</span><span class="w">  </span><span class="c1">//输出4294967286</span>
+
+<span class="n">i</span><span class="w"> </span><span class="o">-=</span><span class="w"> </span><span class="n">u</span><span class="p">;</span><span class="w"></span>
+<span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">endl</span><span class="p">;</span><span class="w">      </span><span class="c1">//输出-10</span>
+</code></pre></div>
+
+<p>第一次cout输出<code>4294967286</code>，而第二行输出<code>-10</code>，为什么会有这种现象呢？</p>
+<p>在运算<code>i - u</code>时，编译器会先将<code>i</code>强转为<code>unsigned</code>类型，然后再进行运算，两个<code>unsigned</code>类型进行运算，且结果是一个“负值”，自然会产生溢出。</p>
+<p>而第二行是<code>i -= u</code>可展开为<code>i = static_cast&lt;int&gt;(i - u)</code>，<code>4294967286</code>强转为<code>int</code>类型后为<code>-10</code>，其结果自然就正确了，不过此过程中仍存在溢出，虽然相当隐晦，但若是测试项目中开启了ubsan，这行语句就会被检测并触发crash，应当极力避免！</p>
+<h2 id="_3">解决方式</h2>
+<div class="codehilite"><pre><span></span><code><span class="n">i</span><span class="w"> </span><span class="o">-=</span><span class="w"> </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="n">u</span><span class="p">);</span><span class="w"></span>
+</code></pre></div>
+
+<p>不过注意，此过程中将<code>u</code>强转为<code>int</code>类型也存在溢出风险，需自行判断数据范围是否可能导致溢出。</p>
+<h2 id="_4">引申</h2>
+<p>在<code>int</code>类型和<code>unsigned</code>类型之间的所有操作符中：加减乘除甚至比较符，均会先将<code>int</code>强转为<code>unsigned</code>再做运算。</p>
+<p>位操作符不会有此现象。</p>
+<p>取余操作虽不会溢出，但结果会不合预期，原因可能与有符号数和无符号数不同的存储方式有关，具体原因待分析：</p>
+<div class="codehilite"><pre><span></span><code><span class="kt">unsigned</span><span class="w"> </span><span class="n">u</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">3</span><span class="p">;</span><span class="w"></span>
+<span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">-10</span><span class="p">;</span><span class="w"></span>
+<span class="kt">int</span><span class="w"> </span><span class="n">i2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">3</span><span class="p">;</span><span class="w"></span>
+<span class="n">cout</span><span class="o">&lt;&lt;</span><span class="p">(</span><span class="n">i</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="n">i2</span><span class="p">)</span><span class="o">&lt;&lt;</span><span class="n">endl</span><span class="p">;</span><span class="w"> </span><span class="c1">//输出-1</span>
+<span class="n">cout</span><span class="o">&lt;&lt;</span><span class="p">(</span><span class="n">i</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="n">u</span><span class="p">)</span><span class="o">&lt;&lt;</span><span class="n">endl</span><span class="p">;</span><span class="w">  </span><span class="c1">//输出0</span>
+</code></pre></div>
+    </body>
+</html>
