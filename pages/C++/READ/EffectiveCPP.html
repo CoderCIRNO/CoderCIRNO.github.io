@@ -86,7 +86,38 @@
 <h3 id="_5">默认的拷贝构造</h3>
 <p>其功能是将来源对象的每一个non-static成员变量拷贝到目标对象，即所谓浅拷贝。</p>
 <p>但如果成员变量中含有引用，则默认拷贝构造不会被生成，因为C++并不允许改变引用的指向。如果开发者没有为其定义拷贝构造，那么这个类将不存在拷贝构造函数，任何对象间的copy操作都无法通过编译。</p>
-<h2 id="06">条款06</h2>
+<h2 id="07">条款07</h2>
+<h3 id="_6">纯虚函数</h3>
+<p>有时需要一个完全抽象类，但手头没有纯虚函数的需求，这种情况下可以将它的析构声明为纯虚函数，不过必须为这个纯虚析构提供一份定义，否则无法通过编译。</p>
+<h2 id="08">条款08</h2>
+<h3 id="_7">如果析构可能会发生异常</h3>
+<p>单独拿出析构函数中可能存在风险的部分，并给类设置双重保险：</p>
+<div class="codehilite"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">DBConn</span><span class="p">{</span><span class="w"></span>
+<span class="k">public</span><span class="o">:</span><span class="w"></span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="n">close</span><span class="p">()</span><span class="w"></span>
+<span class="w">    </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="n">db</span><span class="p">.</span><span class="n">close</span><span class="p">();</span><span class="w"></span>
+<span class="w">        </span><span class="n">closed</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="w">    </span><span class="o">~</span><span class="n">DBConn</span><span class="p">()</span><span class="w"></span>
+<span class="w">    </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">closed</span><span class="p">)</span><span class="w"></span>
+<span class="w">        </span><span class="p">{</span><span class="w"></span>
+<span class="w">            </span><span class="k">try</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">                </span><span class="n">db</span><span class="p">.</span><span class="n">close</span><span class="p">();</span><span class="w"></span>
+<span class="w">            </span><span class="p">}</span><span class="w"></span>
+<span class="w">            </span><span class="k">catch</span><span class="w"> </span><span class="p">(...)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">                </span><span class="c1">//记录异常，结束程序或直接吞下异常</span>
+<span class="w">            </span><span class="p">}</span><span class="w"></span>
+<span class="w">        </span><span class="p">}</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="k">private</span><span class="o">:</span><span class="w"></span>
+<span class="w">    </span><span class="n">DBConnection</span><span class="w"> </span><span class="n">db</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="kt">bool</span><span class="w"> </span><span class="n">closed</span><span class="p">;</span><span class="w"></span>
+<span class="p">};</span><span class="w"></span>
+</code></pre></div>
+
+<p>这种设计给了客户一个防范风险的机会，能让他们提前处理错误。而且即便客户忽略了这个机会，也不会引入额外的风险。</p>
 <p><strong>[TBC]</strong></p>
     </body>
 </html>
