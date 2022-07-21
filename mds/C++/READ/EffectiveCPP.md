@@ -197,4 +197,106 @@ int main(void){
 }
 ```
 
+*ps: 小米禁止shadow变量(`-Werror`,`-Wshadow`)*
+
+## 条款37
+
+### 缺省值静态绑定
+
+以下代码：
+
+```cpp
+class Base
+{
+public:
+    virtual void test(int output0 = 1)
+    {
+        cout<<"B:"<<output0<<endl;
+    }
+};
+
+class Derived:public Base
+{
+public:
+    virtual void test(int output1 = 2)
+    {
+        cout<<"D:"<<output1<<endl;
+    }
+};
+
+int main(void){
+    Derived D;
+    D.test(); //D:2
+    Base *pD = new Derived;
+    pD->test(); //D:1
+}
+```
+
+观察代码基本可以认定，在使用缺省参数调用`Derived`类的`test()`函数时，其输出固定为"D:2"，然而事实并非如此：
+
+`D.test()`输出为"D:2"，符合预期。
+
+`pD->test()`实际输出为"D:1"，程序确实调用到了`Derived::test`，但却使用了`Base::test`的缺省参数，这种组合几乎很难被预测。
+
+出现这种现象的原因是：虚函数动态绑定，而缺省参数静态绑定。在调用`pD->test()`前，根据缺省参数静态绑定，`Base::test`的缺省参数`1`被放入寄存器，在实际`call`函数时，根据动态绑定，程序去虚函数表中找到了应该调用的`Derived::test`，于是自然产生了这种结果。
+
+接下来再考虑另一情况：如果`Derived::test`和`Base::test`的缺省参数类型不同，乃至个数不同呢？
+
+```cpp
+class Base
+{
+public:
+    virtual void test(char output0 = 'A') //char
+    {
+        cout<<"B:"<<output0<<endl;
+    }
+};
+
+class Derived:public Base
+{
+public:
+    virtual void test(int output1 = 2) //int
+    {
+        cout<<"D:"<<output1<<endl;
+    }
+};
+
+int main(void){
+    Derived D;
+    D.test(); //D:2
+    Base *pD = new Derived;
+    pD->test(); //B:A
+}
+```
+
+如果真的出现了这种情况，很遗憾，通过`Base`类型指针是再也不可能调用到`Derived::test`了，不论它指向谁，无论我们给它怎样的参数，就好像我们从没定义过`Derived::test`一样，并且编译器对此不会给出任何提示，除非是给`Base::test`传入了“错误的”参数类型或个数。
+
+实际上编译器在处理这种情况时，做了这样的处理：`Base::test`和`Derived::test`都被放进了`Derived`类的虚函数表里，在调用时根据指针的类型决定调用哪个函数，这像是一个`non-virtual`的`virtual`函数——它确实在虚函数表里，却要根据指针类型来调用。
+
+```
+; static_cast<Base*>(pD)->test()
+ mov    rax,QWORD PTR [rbp-0x18]
+ mov    rax,QWORD PTR [rax]
+ mov    rdx,QWORD PTR [rax]
+ mov    rax,QWORD PTR [rbp-0x18]
+ mov    esi,0x41
+ mov    rdi,rax
+ call   rdx
+
+; static_cast<Derived*>(pD)->test()
+; 如果pD指向一个Base对象，会发生段错误
+ mov    rax,QWORD PTR [rbp-0x18]
+ mov    rax,QWORD PTR [rax]
+ add    rax,0x8
+ mov    rdx,QWORD PTR [rax]
+ mov    rax,QWORD PTR [rbp-0x18]
+ mov    esi,0x2
+ mov    rdi,rax
+ call   rdx
+```
+
+总之：
+
+尽量不要给虚函数设置缺省参数，在非设不可时，考虑使用`non-virtual`接口。
+
 **[TBC]**
