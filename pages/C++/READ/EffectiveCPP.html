@@ -138,6 +138,111 @@
 <h3 id="inline_1">inline是一个申请，而不是要求</h3>
 <p><code>inline</code>关键字是一个申请，具体是否在编译期展开，最终由编译器来决定。如果使用<code>-O0</code>参数来编译，则任何<code>inline</code>函数都不会被展开。</p>
 <p>即便编译器认为某个函数应当被内联，如果此函数在某处被取地址，编译器还是会为它生成一个函数本体。当通过指针调用时，使用正常调用。当通过函数名调用时，编译器会内联处理。</p>
+<h2 id="33">条款33</h2>
+<h3 id="_8">关于变量名称遮蔽</h3>
+<p>同个作用域下不能声明两个同名变量，但只要作用域不同，就可以声明同名变量，编译器在寻找变量时，先在较小的作用域中寻找，如果没有，再层层向上寻找外部作用域。</p>
+<div class="codehilite"><pre><span></span><code><span class="kt">int</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+
+<span class="kt">int</span><span class="w"> </span><span class="nf">main</span><span class="p">(</span><span class="kt">void</span><span class="p">){</span><span class="w"></span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="kt">int</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span><span class="w"></span>
+<span class="w">        </span><span class="n">cout</span><span class="o">&lt;&lt;</span><span class="n">a</span><span class="o">&lt;&lt;</span><span class="n">endl</span><span class="p">;</span><span class="w"> </span><span class="c1">// 输出&quot;2&quot;</span>
+<span class="w">        </span><span class="p">{</span><span class="w"></span>
+<span class="w">            </span><span class="kt">char</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="sc">&#39;H&#39;</span><span class="p">;</span><span class="w"></span>
+<span class="w">            </span><span class="n">cout</span><span class="o">&lt;&lt;</span><span class="n">a</span><span class="o">&lt;&lt;</span><span class="n">endl</span><span class="p">;</span><span class="w"> </span><span class="c1">// 输出&quot;H&quot;</span>
+<span class="w">        </span><span class="p">}</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="w">    </span><span class="n">cout</span><span class="o">&lt;&lt;</span><span class="n">a</span><span class="o">&lt;&lt;</span><span class="n">endl</span><span class="p">;</span><span class="w"> </span><span class="c1">//输出 &quot;1&quot;</span>
+<span class="p">}</span><span class="w"></span>
+</code></pre></div>
+
+<p><em>ps: 小米禁止shadow变量(<code>-Werror</code>,<code>-Wshadow</code>)</em></p>
+<h2 id="37">条款37</h2>
+<h3 id="_9">缺省值静态绑定</h3>
+<p>以下代码：</p>
+<div class="codehilite"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Base</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="k">public</span><span class="o">:</span><span class="w"></span>
+<span class="w">    </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="n">test</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">output0</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="n">cout</span><span class="o">&lt;&lt;</span><span class="s">&quot;B:&quot;</span><span class="o">&lt;&lt;</span><span class="n">output0</span><span class="o">&lt;&lt;</span><span class="n">endl</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="p">};</span><span class="w"></span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">Derived</span><span class="o">:</span><span class="k">public</span><span class="w"> </span><span class="n">Base</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="k">public</span><span class="o">:</span><span class="w"></span>
+<span class="w">    </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="n">test</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">output1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">2</span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="n">cout</span><span class="o">&lt;&lt;</span><span class="s">&quot;D:&quot;</span><span class="o">&lt;&lt;</span><span class="n">output1</span><span class="o">&lt;&lt;</span><span class="n">endl</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="p">};</span><span class="w"></span>
+
+<span class="kt">int</span><span class="w"> </span><span class="nf">main</span><span class="p">(</span><span class="kt">void</span><span class="p">){</span><span class="w"></span>
+<span class="w">    </span><span class="n">Derived</span><span class="w"> </span><span class="n">D</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="n">D</span><span class="p">.</span><span class="n">test</span><span class="p">();</span><span class="w"> </span><span class="c1">//D:2</span>
+<span class="w">    </span><span class="n">Base</span><span class="w"> </span><span class="o">*</span><span class="n">pD</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">Derived</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="n">pD</span><span class="o">-&gt;</span><span class="n">test</span><span class="p">();</span><span class="w"> </span><span class="c1">//D:1</span>
+<span class="p">}</span><span class="w"></span>
+</code></pre></div>
+
+<p>观察代码基本可以认定，在使用缺省参数调用<code>Derived</code>类的<code>test()</code>函数时，其输出固定为"D:2"，然而事实并非如此：</p>
+<p><code>D.test()</code>输出为"D:2"，符合预期。</p>
+<p><code>pD-&gt;test()</code>实际输出为"D:1"，程序确实调用到了<code>Derived::test</code>，但却使用了<code>Base::test</code>的缺省参数，这种组合几乎很难被预测。</p>
+<p>出现这种现象的原因是：虚函数动态绑定，而缺省参数静态绑定。在调用<code>pD-&gt;test()</code>前，根据缺省参数静态绑定，<code>Base::test</code>的缺省参数<code>1</code>被放入寄存器，在实际<code>call</code>函数时，根据动态绑定，程序去虚函数表中找到了应该调用的<code>Derived::test</code>，于是自然产生了这种结果。</p>
+<p>接下来再考虑另一情况：如果<code>Derived::test</code>和<code>Base::test</code>的缺省参数类型不同，乃至个数不同呢？</p>
+<div class="codehilite"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Base</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="k">public</span><span class="o">:</span><span class="w"></span>
+<span class="w">    </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="n">test</span><span class="p">(</span><span class="kt">char</span><span class="w"> </span><span class="n">output0</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="sc">&#39;A&#39;</span><span class="p">)</span><span class="w"> </span><span class="c1">//char</span>
+<span class="w">    </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="n">cout</span><span class="o">&lt;&lt;</span><span class="s">&quot;B:&quot;</span><span class="o">&lt;&lt;</span><span class="n">output0</span><span class="o">&lt;&lt;</span><span class="n">endl</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="p">};</span><span class="w"></span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">Derived</span><span class="o">:</span><span class="k">public</span><span class="w"> </span><span class="n">Base</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="k">public</span><span class="o">:</span><span class="w"></span>
+<span class="w">    </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="n">test</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">output1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">2</span><span class="p">)</span><span class="w"> </span><span class="c1">//int</span>
+<span class="w">    </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="n">cout</span><span class="o">&lt;&lt;</span><span class="s">&quot;D:&quot;</span><span class="o">&lt;&lt;</span><span class="n">output1</span><span class="o">&lt;&lt;</span><span class="n">endl</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="p">};</span><span class="w"></span>
+
+<span class="kt">int</span><span class="w"> </span><span class="nf">main</span><span class="p">(</span><span class="kt">void</span><span class="p">){</span><span class="w"></span>
+<span class="w">    </span><span class="n">Derived</span><span class="w"> </span><span class="n">D</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="n">D</span><span class="p">.</span><span class="n">test</span><span class="p">();</span><span class="w"> </span><span class="c1">//D:2</span>
+<span class="w">    </span><span class="n">Base</span><span class="w"> </span><span class="o">*</span><span class="n">pD</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">Derived</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="n">pD</span><span class="o">-&gt;</span><span class="n">test</span><span class="p">();</span><span class="w"> </span><span class="c1">//B:A</span>
+<span class="p">}</span><span class="w"></span>
+</code></pre></div>
+
+<p>如果真的出现了这种情况，很遗憾，通过<code>Base</code>类型指针是再也不可能调用到<code>Derived::test</code>了，不论它指向谁，无论我们给它怎样的参数，就好像我们从没定义过<code>Derived::test</code>一样，并且编译器对此不会给出任何提示，除非是给<code>Base::test</code>传入了“错误的”参数类型或个数。</p>
+<p>实际上编译器在处理这种情况时，做了这样的处理：<code>Base::test</code>和<code>Derived::test</code>都被放进了<code>Derived</code>类的虚函数表里，在调用时根据指针的类型决定调用哪个函数，这像是一个<code>non-virtual</code>的<code>virtual</code>函数——它确实在虚函数表里，却要根据指针类型来调用。</p>
+<div class="codehilite"><pre><span></span><code><span class="p">;</span><span class="w"> </span><span class="n">static_cast</span><span class="o">&lt;</span><span class="n">Base</span><span class="o">*&gt;</span><span class="p">(</span><span class="n">pD</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">test</span><span class="p">()</span><span class="w"></span>
+<span class="w"> </span><span class="n">mov</span><span class="w">    </span><span class="n">rax</span><span class="p">,</span><span class="n">QWORD</span><span class="w"> </span><span class="n">PTR</span><span class="w"> </span><span class="o">[</span><span class="n">rbp-0x18</span><span class="o">]</span><span class="w"></span>
+<span class="w"> </span><span class="n">mov</span><span class="w">    </span><span class="n">rax</span><span class="p">,</span><span class="n">QWORD</span><span class="w"> </span><span class="n">PTR</span><span class="w"> </span><span class="o">[</span><span class="n">rax</span><span class="o">]</span><span class="w"></span>
+<span class="w"> </span><span class="n">mov</span><span class="w">    </span><span class="n">rdx</span><span class="p">,</span><span class="n">QWORD</span><span class="w"> </span><span class="n">PTR</span><span class="w"> </span><span class="o">[</span><span class="n">rax</span><span class="o">]</span><span class="w"></span>
+<span class="w"> </span><span class="n">mov</span><span class="w">    </span><span class="n">rax</span><span class="p">,</span><span class="n">QWORD</span><span class="w"> </span><span class="n">PTR</span><span class="w"> </span><span class="o">[</span><span class="n">rbp-0x18</span><span class="o">]</span><span class="w"></span>
+<span class="w"> </span><span class="n">mov</span><span class="w">    </span><span class="n">esi</span><span class="p">,</span><span class="mh">0x41</span><span class="w"></span>
+<span class="w"> </span><span class="n">mov</span><span class="w">    </span><span class="n">rdi</span><span class="p">,</span><span class="n">rax</span><span class="w"></span>
+<span class="w"> </span><span class="k">call</span><span class="w">   </span><span class="n">rdx</span><span class="w"></span>
+
+<span class="p">;</span><span class="w"> </span><span class="n">static_cast</span><span class="o">&lt;</span><span class="n">Derived</span><span class="o">*&gt;</span><span class="p">(</span><span class="n">pD</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">test</span><span class="p">()</span><span class="w"></span>
+<span class="p">;</span><span class="w"> </span><span class="n">如果pD指向一个Base对象</span><span class="err">，</span><span class="n">会发生段错误</span><span class="w"></span>
+<span class="w"> </span><span class="n">mov</span><span class="w">    </span><span class="n">rax</span><span class="p">,</span><span class="n">QWORD</span><span class="w"> </span><span class="n">PTR</span><span class="w"> </span><span class="o">[</span><span class="n">rbp-0x18</span><span class="o">]</span><span class="w"></span>
+<span class="w"> </span><span class="n">mov</span><span class="w">    </span><span class="n">rax</span><span class="p">,</span><span class="n">QWORD</span><span class="w"> </span><span class="n">PTR</span><span class="w"> </span><span class="o">[</span><span class="n">rax</span><span class="o">]</span><span class="w"></span>
+<span class="w"> </span><span class="k">add</span><span class="w">    </span><span class="n">rax</span><span class="p">,</span><span class="mh">0x8</span><span class="w"></span>
+<span class="w"> </span><span class="n">mov</span><span class="w">    </span><span class="n">rdx</span><span class="p">,</span><span class="n">QWORD</span><span class="w"> </span><span class="n">PTR</span><span class="w"> </span><span class="o">[</span><span class="n">rax</span><span class="o">]</span><span class="w"></span>
+<span class="w"> </span><span class="n">mov</span><span class="w">    </span><span class="n">rax</span><span class="p">,</span><span class="n">QWORD</span><span class="w"> </span><span class="n">PTR</span><span class="w"> </span><span class="o">[</span><span class="n">rbp-0x18</span><span class="o">]</span><span class="w"></span>
+<span class="w"> </span><span class="n">mov</span><span class="w">    </span><span class="n">esi</span><span class="p">,</span><span class="mh">0x2</span><span class="w"></span>
+<span class="w"> </span><span class="n">mov</span><span class="w">    </span><span class="n">rdi</span><span class="p">,</span><span class="n">rax</span><span class="w"></span>
+<span class="w"> </span><span class="k">call</span><span class="w">   </span><span class="n">rdx</span><span class="w"></span>
+</code></pre></div>
+
+<p>总之：</p>
+<p>尽量不要给虚函数设置缺省参数，在非设不可时，考虑使用<code>non-virtual</code>接口。</p>
 <p><strong>[TBC]</strong></p>
     </body>
 </html>
