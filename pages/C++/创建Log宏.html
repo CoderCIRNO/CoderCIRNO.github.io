@@ -1,0 +1,31 @@
+
+<html lang="zh-cn">
+    <head>
+        <meta content="text/html; charset=utf-8" http-equiv="content-type" />
+        <title>创建Log宏</title>
+        <link href="../../css/default.css" rel="stylesheet">
+    </head>
+    <body>
+        <h1 id="log">创建Log宏</h1>
+<p>可以通过以下代码创建Log宏（仿照Qcom offline log）</p>
+<div class="codehilite"><pre><span></span><code><span class="cp">#ifndef CAMX_WTLOG</span>
+<span class="cp">#define CAMX_WTLOG(fmt, ...)\</span>
+<span class="cp">    {FILE *f_wtl;\</span>
+<span class="cp">    f_wtl = fopen(&quot;/data/vendor/camera/wtlog.txt&quot;, &quot;a+&quot;);\</span>
+<span class="cp">    if(NULL != f_wtl){\</span>
+<span class="cp">        fprintf(f_wtl, &quot;%s:%d %s()  &quot; fmt &quot;\n&quot;, __FILE__, __LINE__, __FUNCTION__, ##__VA_ARGS__);\</span>
+<span class="cp">    }\</span>
+<span class="cp">    fclose(f_wtl);}</span>
+<span class="cp">#endif</span>
+</code></pre></div>
+
+<p>实时查看</p>
+<div class="codehilite"><pre><span></span><code>adb root
+clear
+adb shell tail -f /data/vendor/camera/wtlog.txt
+</code></pre></div>
+
+<p><strong>[TODO]</strong></p>
+<p>增加时间</p>
+    </body>
+</html>

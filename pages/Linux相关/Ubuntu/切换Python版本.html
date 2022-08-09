@@ -1,0 +1,29 @@
+
+<html lang="zh-cn">
+    <head>
+        <meta content="text/html; charset=utf-8" http-equiv="content-type" />
+        <title>切换Python版本</title>
+        <link href="../../../css/default.css" rel="stylesheet">
+    </head>
+    <body>
+        <h1 id="python">切换Python版本</h1>
+<div class="codehilite"><pre><span></span><code><span class="k">function</span> _switch_python_version<span class="o">()</span>
+<span class="o">{</span>
+    <span class="nv">flag</span><span class="o">=</span><span class="sb">`</span>ls -l /usr/bin/python <span class="p">|</span> grep -c <span class="s2">&quot;python2.7&quot;</span><span class="sb">`</span>
+    <span class="k">if</span> <span class="o">((</span><span class="nv">$flag</span> <span class="o">==</span> <span class="m">1</span><span class="o">))</span>
+    <span class="k">then</span>
+        <span class="nb">echo</span> <span class="s2">&quot;python2.7 now, switching...&quot;</span>
+        sudo ln -sf /usr/bin/python3.6 /usr/bin/python
+        <span class="nb">echo</span> <span class="s2">&quot;switched to python3.6!&quot;</span>
+    <span class="k">else</span>
+        <span class="nb">echo</span> <span class="s2">&quot;python3.6 now, switching...&quot;</span>
+        sudo ln -sf /usr/bin/python2.7 /usr/bin/python
+        <span class="nb">echo</span> <span class="s2">&quot;switched to python2.7!&quot;</span>
+    <span class="k">fi</span>
+<span class="o">}</span>
+</code></pre></div>
+
+<p>如果当前是2.7，切换到3.6;</p>
+<p>如果是3.6，则切换到2.7</p>
+    </body>
+</html>
