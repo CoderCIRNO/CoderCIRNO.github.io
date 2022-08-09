@@ -21,3 +21,7 @@ adb root
 clear
 adb shell tail -f /data/vendor/camera/wtlog.txt
 ```
+
+**[TODO]**
+
+增加时间
