@@ -1,0 +1,25 @@
+
+<html lang="zh-cn">
+    <head>
+        <meta content="text/html; charset=utf-8" http-equiv="content-type" />
+        <title>selenium</title>
+        <link href="../../css/default.css" rel="stylesheet">
+    </head>
+    <body>
+        <h1 id="selenium">selenium</h1>
+<div class="codehilite"><pre><span></span><code><span class="kn">from</span> <span class="nn">selenium</span> <span class="kn">import</span> <span class="n">webdriver</span>
+<span class="n">options</span> <span class="o">=</span> <span class="n">webdriver</span><span class="o">.</span><span class="n">ChromeOptions</span><span class="p">()</span>
+<span class="n">driver</span> <span class="o">=</span> <span class="n">webdriver</span><span class="o">.</span><span class="n">Chrome</span><span class="p">(</span><span class="n">executable_path</span><span class="o">=</span><span class="s2">&quot;../chromeDriver/chromedriver&quot;</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="n">options</span><span class="p">)</span>
+<span class="n">driver</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;https://www.example.com/&quot;</span><span class="p">)</span>
+
+<span class="c1">#oth </span>
+
+<span class="n">status</span> <span class="o">=</span> <span class="n">driver</span><span class="o">.</span><span class="n">find_element_by_css_selector</span><span class="p">(</span><span class="s2">&quot;#status-val &gt; span&quot;</span><span class="p">)</span>
+<span class="k">if</span> <span class="n">status</span><span class="o">.</span><span class="n">text</span> <span class="o">==</span> <span class="s2">&quot;开放&quot;</span><span class="p">:</span>
+    <span class="n">resolveButton</span> <span class="o">=</span> <span class="n">driver</span><span class="o">.</span><span class="n">find_element_by_css_selector</span><span class="p">(</span><span class="s2">&quot;#action_id_71 &gt; span&quot;</span><span class="p">)</span>
+    <span class="n">resolveButton</span><span class="o">.</span><span class="n">click</span><span class="p">()</span>
+    <span class="n">toInput</span> <span class="o">=</span> <span class="n">driver</span><span class="o">.</span><span class="n">find_element_by_css_selector</span><span class="p">(</span><span class="s2">&quot;#comment&quot;</span><span class="p">)</span>
+    <span class="n">toInput</span><span class="o">.</span><span class="n">send_keys</span><span class="p">(</span><span class="s2">&quot;M2不使用此文件&quot;</span><span class="p">)</span>
+</code></pre></div>
+    </body>
+</html>
