@@ -1,0 +1,20 @@
+
+<html lang="zh-cn">
+    <head>
+        <meta content="text/html; charset=utf-8" http-equiv="content-type" />
+        <title>防火墙设置</title>
+        <link href="../../../css/default.css" rel="stylesheet">
+    </head>
+    <body>
+        <h1 id="unable-to-connect-to-remote-host-no-route-to-host">Unable to connect to remote host: No route to host</h1>
+<h2 id="iptables">检查iptables是不是有防火墙的设置</h2>
+<div class="codehilite"><pre><span></span><code> iptables -L INPUT --line-numbers
+<span class="c1"># 结果如下</span>
+<span class="m">7</span>    REJECT     all  --  anywhere             anywhere             reject-with icmp-host-prohibited
+</code></pre></div>
+
+<h2 id="_1">删除记录</h2>
+<div class="codehilite"><pre><span></span><code>iptables -D INPUT <span class="m">7</span>
+</code></pre></div>
+    </body>
+</html>
