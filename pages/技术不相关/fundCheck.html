@@ -1,0 +1,104 @@
+
+<html lang="zh-cn">
+    <head>
+        <meta content="text/html; charset=utf-8" http-equiv="content-type" />
+        <title>fundCheck</title>
+        <link href="../../css/default.css" rel="stylesheet">
+    </head>
+    <body>
+        <h1 id="fundcheck">fundCheck</h1>
+<div class="codehilite"><pre><span></span><code><span class="kn">import</span> <span class="nn">requests</span>
+<span class="kn">import</span> <span class="nn">json</span>
+
+<span class="c1"># data</span>
+<span class="c1"># name</span>
+<span class="c1"># jzrq</span>
+<span class="c1"># dwjz</span>
+<span class="c1"># gsz</span>
+<span class="c1"># zszzl</span>
+<span class="c1"># gztime</span>
+
+<span class="c1">#        code      ownVal  ownAmount  fakeName</span>
+<span class="n">myFunds</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="p">[</span><span class="s1">&#39;013195&#39;</span><span class="p">,</span> <span class="mf">0.6790</span><span class="p">,</span> <span class="mf">8836.34</span><span class="p">,</span>   <span class="s2">&quot;car 1    &quot;</span><span class="p">],</span>
+        <span class="p">[</span><span class="s1">&#39;014605&#39;</span><span class="p">,</span> <span class="mf">0.9338</span><span class="p">,</span> <span class="mf">1285.07</span><span class="p">,</span>   <span class="s2">&quot;light    &quot;</span><span class="p">]</span>
+    <span class="p">]</span>
+
+<span class="n">toUpdate</span> <span class="o">=</span> <span class="p">[]</span>
+
+<span class="k">def</span> <span class="nf">getFundData</span><span class="p">(</span><span class="n">fundCode</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+    <span class="n">responser</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;http://fundgz.1234567.com.cn/js/</span><span class="si">{</span><span class="n">fundCode</span><span class="si">}</span><span class="s2">.js&quot;</span><span class="p">)</span>
+    <span class="n">jsonStr</span> <span class="o">=</span> <span class="n">responser</span><span class="o">.</span><span class="n">text</span>
+    <span class="n">jsonStr</span> <span class="o">=</span> <span class="n">jsonStr</span><span class="p">[</span><span class="mi">8</span><span class="p">:]</span>
+    <span class="n">jsonStr</span> <span class="o">=</span> <span class="n">jsonStr</span><span class="p">[:</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">jsonStr</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">data</span>
+
+<span class="k">def</span> <span class="nf">deltaFloat</span><span class="p">(</span><span class="n">aimFloat</span><span class="p">,</span> <span class="n">roundCount</span><span class="p">,</span> <span class="n">limit</span> <span class="o">=</span> <span class="mi">0</span><span class="p">):</span>
+    <span class="n">res</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">round</span><span class="p">(</span><span class="n">aimFloat</span><span class="p">,</span> <span class="n">roundCount</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+    <span class="k">if</span> <span class="n">aimFloat</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">res</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="s1">&#39;-&#39;</span><span class="p">:</span>
+            <span class="n">res</span>  <span class="o">=</span> <span class="s1">&#39;+&#39;</span> <span class="o">+</span> <span class="n">res</span>
+    <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="n">res</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">limit</span><span class="p">:</span>
+        <span class="n">res</span> <span class="o">+=</span> <span class="s1">&#39; &#39;</span>
+    <span class="k">return</span> <span class="n">res</span>
+
+<span class="k">def</span> <span class="nf">debugData</span><span class="p">():</span>
+    <span class="k">for</span> <span class="n">fund</span> <span class="ow">in</span> <span class="n">myFunds</span><span class="p">:</span>
+        <span class="n">fakeName</span>        <span class="o">=</span> <span class="n">fund</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+        <span class="n">data</span>            <span class="o">=</span> <span class="n">getFundData</span><span class="p">(</span><span class="n">fund</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">fundName</span>        <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span>
+        <span class="n">lastRealValDate</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;jzrq&quot;</span><span class="p">]</span>
+        <span class="n">lastRealVal</span>     <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;dwjz&quot;</span><span class="p">]</span>
+        <span class="n">estVal</span>          <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;gsz&quot;</span><span class="p">]</span>
+        <span class="n">estValDelta</span>     <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;gszzl&quot;</span><span class="p">]</span>
+        <span class="n">estValTime</span>      <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;gztime&quot;</span><span class="p">]</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">fakeName</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">lastRealVal</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">lastRealValDate</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">estVal</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">estValDelta</span><span class="si">}</span><span class="s2">. </span><span class="si">{</span><span class="n">estValTime</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">fixLengthStr</span><span class="p">(</span><span class="n">originalStr</span><span class="p">,</span> <span class="n">length</span><span class="p">):</span>
+    <span class="n">res</span> <span class="o">=</span> <span class="n">originalStr</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">res</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">length</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">res</span><span class="p">[:</span><span class="n">length</span><span class="p">]</span>
+    <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="n">res</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">length</span><span class="p">:</span>
+        <span class="n">res</span> <span class="o">+=</span> <span class="s1">&#39; &#39;</span>
+    <span class="k">return</span> <span class="n">res</span>
+
+<span class="c1">#{fixLengthStr(&quot;TIME&quot;, 9)}</span>
+
+<span class="k">def</span> <span class="nf">formalPrint</span><span class="p">():</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">fixLengthStr</span><span class="p">(</span><span class="s1">&#39;NAME&#39;</span><span class="p">,</span> <span class="mi">9</span><span class="p">)</span><span class="si">}</span><span class="s2">  |  </span><span class="si">{</span><span class="n">fixLengthStr</span><span class="p">(</span><span class="s1">&#39; VDA(%)&#39;</span><span class="p">,</span> <span class="mi">9</span><span class="p">)</span><span class="si">}</span><span class="s2">  </span><span class="si">{</span><span class="n">fixLengthStr</span><span class="p">(</span><span class="s1">&#39; VDT(%)&#39;</span><span class="p">,</span> <span class="mi">9</span><span class="p">)</span><span class="si">}</span><span class="s2">  |  </span><span class="si">{</span><span class="n">fixLengthStr</span><span class="p">(</span><span class="s1">&#39; MDA(Y)&#39;</span><span class="p">,</span> <span class="mi">9</span><span class="p">)</span><span class="si">}</span><span class="s2">  </span><span class="si">{</span><span class="n">fixLengthStr</span><span class="p">(</span><span class="s1">&#39; MDT(Y)&#39;</span><span class="p">,</span> <span class="mi">9</span><span class="p">)</span><span class="si">}</span><span class="s2">  |  </span><span class="si">{</span><span class="n">fixLengthStr</span><span class="p">(</span><span class="s1">&#39;TIME&#39;</span><span class="p">,</span> <span class="mi">9</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">moneyDeltaAllCount</span>   <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="n">moneyDeltaTodayCount</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="n">fundCostALL</span>          <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="n">lastFundValALL</span>       <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="k">for</span> <span class="n">fund</span> <span class="ow">in</span> <span class="n">myFunds</span><span class="p">:</span>
+        <span class="n">data</span>            <span class="o">=</span> <span class="n">getFundData</span><span class="p">(</span><span class="n">fund</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">fundName</span>        <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span>
+        <span class="n">fakeName</span>        <span class="o">=</span> <span class="n">fund</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+        <span class="n">lastRealVal</span>     <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;dwjz&quot;</span><span class="p">])</span>
+        <span class="n">valDeltaAll</span>     <span class="o">=</span> <span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;gsz&quot;</span><span class="p">])</span> <span class="o">-</span> <span class="n">fund</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">*</span> <span class="mi">100</span> <span class="o">/</span> <span class="n">fund</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">valDeltaToday</span>   <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;gszzl&quot;</span><span class="p">])</span>
+        <span class="n">moneyDeltaAll</span>   <span class="o">=</span> <span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;gsz&quot;</span><span class="p">])</span> <span class="o">-</span> <span class="n">fund</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">*</span> <span class="n">fund</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+        <span class="n">moneyDeltaToday</span> <span class="o">=</span> <span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;gsz&quot;</span><span class="p">])</span> <span class="o">-</span> <span class="n">lastRealVal</span><span class="p">)</span> <span class="o">*</span> <span class="n">fund</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+        <span class="n">updateTime</span>      <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;gztime&quot;</span><span class="p">]</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">fixLengthStr</span><span class="p">(</span><span class="n">fakeName</span><span class="p">,</span> <span class="mi">9</span><span class="p">)</span><span class="si">}</span><span class="s2">  |  </span><span class="si">{</span><span class="n">deltaFloat</span><span class="p">(</span><span class="n">valDeltaAll</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">9</span><span class="p">)</span><span class="si">}</span><span class="s2">  </span><span class="si">{</span><span class="n">deltaFloat</span><span class="p">(</span><span class="n">valDeltaToday</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">9</span><span class="p">)</span><span class="si">}</span><span class="s2">  |  </span><span class="si">{</span><span class="n">deltaFloat</span><span class="p">(</span><span class="n">moneyDeltaAll</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">9</span><span class="p">)</span><span class="si">}</span><span class="s2">  </span><span class="si">{</span><span class="n">deltaFloat</span><span class="p">(</span><span class="n">moneyDeltaToday</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">9</span><span class="p">)</span><span class="si">}</span><span class="s2">  |  </span><span class="si">{</span><span class="n">fixLengthStr</span><span class="p">(</span><span class="n">updateTime</span><span class="p">,</span> <span class="mi">16</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">moneyDeltaAllCount</span>   <span class="o">+=</span> <span class="n">moneyDeltaAll</span>
+        <span class="n">moneyDeltaTodayCount</span> <span class="o">+=</span> <span class="n">moneyDeltaToday</span>
+        <span class="n">fundCostALL</span>          <span class="o">+=</span> <span class="n">fund</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">fund</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+        <span class="n">lastFundValALL</span>       <span class="o">+=</span> <span class="n">lastRealVal</span> <span class="o">*</span> <span class="n">fund</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+    <span class="n">moneyDeltaALLRatio</span>   <span class="o">=</span> <span class="p">(</span><span class="n">moneyDeltaAllCount</span> <span class="o">/</span> <span class="n">fundCostALL</span><span class="p">)</span> <span class="o">*</span> <span class="mi">100</span>
+    <span class="n">moneyDeltaTodayRatio</span> <span class="o">=</span> <span class="p">(</span><span class="n">moneyDeltaTodayCount</span> <span class="o">/</span> <span class="n">lastFundValALL</span><span class="p">)</span> <span class="o">*</span> <span class="mi">100</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">fixLengthStr</span><span class="p">(</span><span class="s1">&#39;ALL&#39;</span><span class="p">,</span> <span class="mi">9</span><span class="p">)</span><span class="si">}</span><span class="s2">  |  </span><span class="si">{</span><span class="n">deltaFloat</span><span class="p">(</span><span class="n">moneyDeltaALLRatio</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">9</span><span class="p">)</span><span class="si">}</span><span class="s2">  </span><span class="si">{</span><span class="n">deltaFloat</span><span class="p">(</span><span class="n">moneyDeltaTodayRatio</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">9</span><span class="p">)</span><span class="si">}</span><span class="s2">  |  </span><span class="si">{</span><span class="n">deltaFloat</span><span class="p">(</span><span class="n">moneyDeltaAllCount</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">9</span><span class="p">)</span><span class="si">}</span><span class="s2">  </span><span class="si">{</span><span class="n">deltaFloat</span><span class="p">(</span><span class="n">moneyDeltaTodayCount</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">9</span><span class="p">)</span><span class="si">}</span><span class="s2">  |  </span><span class="si">{</span><span class="n">fixLengthStr</span><span class="p">(</span><span class="s1">&#39;---&#39;</span><span class="p">,</span> <span class="mi">16</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">toUpdate</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">updateStr</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">TO UPDATE :&quot;</span>
+        <span class="k">for</span> <span class="n">updateFundName</span> <span class="ow">in</span> <span class="n">toUpdate</span><span class="p">:</span>
+            <span class="n">updateStr</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot; </span><span class="si">{</span><span class="n">updateFundName</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">updateStr</span><span class="p">)</span>
+
+<span class="n">formalPrint</span><span class="p">()</span>
+<span class="c1"># debugData()</span>
+</code></pre></div>
+
+<p>如有侵权请联系treat@qq.com</p>
+    </body>
+</html>
