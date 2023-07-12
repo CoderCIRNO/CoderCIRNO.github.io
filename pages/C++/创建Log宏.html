@@ -7,7 +7,20 @@
     </head>
     <body>
         <h1 id="log">创建Log宏</h1>
-<p>可以通过以下代码创建Log宏（仿照Qcom offline log）</p>
+<h2 id="_1">标准输出</h2>
+<p>输出到标准输出，并附加开关（在力扣之类需要log调试的场景下非常实用）</p>
+<div class="codehilite"><pre><span></span><code><span class="cp">#define ENABLE_DEBUG 1</span>
+
+<span class="cp">#ifdef ENABLE_DEBUG</span>
+<span class="cp">#define WTLOG(fmt, ...)\</span>
+<span class="cp">    printf(&quot;%s:%d %s()  &quot; fmt &quot;\n&quot;, __FILE__, __LINE__, __FUNCTION__, ##__VA_ARGS__);</span>
+<span class="cp">#else</span>
+<span class="cp">#define WTLOG(fmt, ...)</span>
+<span class="cp">#endif</span>
+</code></pre></div>
+
+<h2 id="_2">输出到文件</h2>
+<p>可以通过以下代码创建Log宏输出到文件（仿照Qcom offline log）</p>
 <div class="codehilite"><pre><span></span><code><span class="cp">#ifndef CAMX_WTLOG</span>
 <span class="cp">#define CAMX_WTLOG(fmt, ...)\</span>
 <span class="cp">    {FILE *f_wtl;\</span>
